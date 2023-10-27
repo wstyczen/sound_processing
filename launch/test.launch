@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <node pkg="sound_processing" name="test" type="test.py" output="screen" />
+</launch>
