@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-from rospkg import RosPack
-
 from pydub import AudioSegment
 import numpy as np
+
 from sample_paths import SamplePaths
 
 
@@ -125,4 +124,3 @@ class AudioMetrics:
         geometric_mean = np.exp(np.mean(np.log(magnitude_spectrum + AudioMetrics.EPS)))
         arithmetic_mean = np.mean(magnitude_spectrum)
         return geometric_mean / (arithmetic_mean + AudioMetrics.EPS)
-

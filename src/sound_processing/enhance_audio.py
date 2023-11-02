@@ -1,7 +1,8 @@
 #!/usr/bin/env python
+import os
+
 from pydub import AudioSegment
 from pydub.silence import split_on_silence
-import os
 
 from sample_paths import SamplePaths
 
@@ -138,11 +139,9 @@ class AudioEnhancement:
         self.normalize_volume()
 
         # Works as intended ??
-        self.equalize_audio()
+        # self.equalize_audio()
 
         # TODO
         # self.reduce_noise()
 
         self.save_output()
-
-

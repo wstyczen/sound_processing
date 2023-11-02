@@ -9,7 +9,7 @@ from sample_paths import SamplePaths
 
 
 def process_samples():
-    print('Processing samples...')
+    print("Processing samples...")
     for file_name in os.listdir(SamplePaths.SAMPLES_DIR):
         if not file_name.endswith(".wav"):
             continue
@@ -30,10 +30,7 @@ def process_samples():
 
         file_path = os.path.join(SamplePaths.PROCESSED_AUDIO_DIR, file_name)
         # Generate plots and metrics for enhanced audio.
-        print(
-            "Processed audio metrics:\n"
-            + str(AudioMetrics(file_path))
-        )
+        print("Processed audio metrics:\n" + str(AudioMetrics(file_path)))
         AudioPlotGenerator(file_path).plot()
 
 

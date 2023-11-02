@@ -1,9 +1,11 @@
 #!/usr/bin/env python
+import os
+
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
-from sample_paths import SamplePaths
 import numpy as np
-import os
+
+from sample_paths import SamplePaths
 
 
 class AudioPlotGenerator:
