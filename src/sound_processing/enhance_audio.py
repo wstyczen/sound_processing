@@ -58,17 +58,15 @@ class AudioEnhancement:
         """
         self._input.export(self._output_path, format="wav")
 
-    def normalize_volume(self):
+    def normalize_volume(self, target_dbfs=-10):
         """
         Normalize the volume of the audio.
 
-        This function ensures that the audio's volume reaches the maximum amplitude
+        This function ensures that the audio's volume reaches the desired amplitude
         available without clipping, making it more consistent in terms of loudness
         and clearer overall.
         """
-        # Apply opposite gain with value of the maximum loudness relative to the
-        # full audio scale in order to normalize the audio to 0 dBFS.
-        self._input = self._input.apply_gain(-self._input.max_dBFS)
+        self._input = self._input.apply_gain(target_dbfs - self._input.max_dBFS)
 
     def apply_filter(self, lowcut=100, highcut=4000):
         """
@@ -104,7 +102,7 @@ class AudioEnhancement:
         non_silent_chunks = split_on_silence(
             audio_segment=self._input,
             min_silence_len=200,
-            keep_silence=150,
+            keep_silence=100,
             silence_thresh=silence_threshold,
         )
         # Merge non-silent back parts together.
@@ -112,36 +110,18 @@ class AudioEnhancement:
         for part in non_silent_chunks[1:]:
             self._input += part
 
-    def equalize_audio(self, target_amplitude=0):
-        """
-        Equalize audio to the target amplitude by applying appropriate gain.
-
-        Args:
-            target_amplitude (int): The target amplitude in dB.
-        """
-        # Equalize audio to the target amplitude
-        gain = target_amplitude - self._input.dBFS
-        self._input = self._input.apply_gain(gain)
-
-    def reduce_noise(self, noise_profile_path):
-        # TODO: Implement.
+    def spectral_subtraction(self, noise_profile=SamplePaths.BACKGROUND_NOISE_SAMPLE):
+        # TODO: Implement working version.
         pass
 
     def enhance(self):
         """
         Enhance the audio by applying a series of processing steps.
         """
+        self.normalize_volume()
+
         self.apply_filter()
 
         self.remove_silence()
-
-        # Works as intended ??
-        self.normalize_volume()
-
-        # Works as intended ??
-        # self.equalize_audio()
-
-        # TODO
-        # self.reduce_noise()
 
         self.save_output()

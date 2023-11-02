@@ -52,7 +52,7 @@ class AudioMetrics:
             str: A formatted string representation.
         """
         return (
-            "{\n\tSNR: %f,\n\tSpectral Flatness: %f,\n\tLoudest 1: %f,\n\tQuietest: %f\n}"
+            "{\n\tSNR: %f,\n\tSpectral Flatness: %f,\n\tLoudest: %f,\n\tQuietest: %f\n}"
             % (
                 self._snr,
                 self.spectral_flatness,
