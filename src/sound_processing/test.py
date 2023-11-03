@@ -17,22 +17,8 @@ def process_samples():
         print("Sample '%s':" % file_name)
         file_path = os.path.join(SamplePaths.SAMPLES_DIR, file_name)
 
-        # Generate plots and metrics for initial audio.
-        print("- Initial audio metrics:\n" + str(AudioMetrics(file_path)))
-        AudioPlotGenerator(file_path).plot()
-
         # Generate files with enhanced audio quality.
-        AudioEnhancement(file_path).enhance()
-
-    for file_name in os.listdir(SamplePaths.PROCESSED_AUDIO_DIR):
-        if not file_name.endswith(".wav"):
-            continue
-
-        file_path = os.path.join(SamplePaths.PROCESSED_AUDIO_DIR, file_name)
-        # Generate plots and metrics for enhanced audio.
-        print("Processed audio metrics:\n" + str(AudioMetrics(file_path)))
-        AudioPlotGenerator(file_path).plot()
-
+        AudioEnhancement(file_path, overwrite_input_file=False).enhance()
 
 if __name__ == "__main__":
     rospy.init_node("audio_test")

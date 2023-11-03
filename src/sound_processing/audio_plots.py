@@ -74,19 +74,6 @@ class AudioPlotGenerator:
         plt.xlabel("Time (s)", fontsize=self.SUBPLOT_AXIS_LABEL_SIZE)
         plt.ylabel("Amplitude", fontsize=self.SUBPLOT_AXIS_LABEL_SIZE)
 
-    def _save_plt(self):
-        """
-        Save the generated plots to a file.
-        """
-        # Ensure the directory for storing the plots exists.
-        if not os.path.exists(SamplePaths.PLOTS_DIR):
-            os.makedirs(SamplePaths.PLOTS_DIR)
-
-        # Save under the same name as input file.
-        file_name, _ = os.path.splitext(os.path.basename(self._file_path))
-
-        plt.savefig(os.path.join(SamplePaths.PLOTS_DIR, file_name + ".png"))
-
     def plot(self):
         """
         Generate avaiable plots for given audio file.
@@ -107,4 +94,12 @@ class AudioPlotGenerator:
         plt.subplots_adjust(hspace=3)
         plt.tight_layout()
 
-        self._save_plt()
+    def save(self, directory, file_name):
+        """
+        Save generated plots to a file.
+
+        Args:
+            directory (str): Path to a directory in which the file will be saved.
+            file_name (str): Name of the file.
+        """
+        plt.savefig(os.path.join(directory, file_name + ".png"))

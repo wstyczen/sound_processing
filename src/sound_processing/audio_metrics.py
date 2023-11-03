@@ -41,8 +41,8 @@ class AudioMetrics:
         self.spectral_flatness = self._get_spectral_flatness()
 
         input_arr = AudioMetrics._as_array(self._input)
-        self._loudest = AudioMetrics._as_DB(np.max(np.abs(input_arr)))
-        self._quietest = AudioMetrics._as_DB(np.min(np.abs(input_arr)))
+        self._loudest = AudioMetrics._as_DB(np.max(input_arr))
+        self._quietest = AudioMetrics._as_DB(np.min(input_arr))
 
     def __repr__(self):
         """
@@ -52,7 +52,7 @@ class AudioMetrics:
             str: A formatted string representation.
         """
         return (
-            "{\n\tSNR: %f,\n\tSpectral Flatness: %f,\n\tLoudest: %f,\n\tQuietest: %f\n}"
+            "{\n\t\"SNR\": %.3f,\n\t\"Spectral Flatness\": %.3f,\n\t\"Loudest (dB)\": %.3f,\n\t\"Quietest (dB)\": %.3f\n}"
             % (
                 self._snr,
                 self.spectral_flatness,
@@ -72,7 +72,7 @@ class AudioMetrics:
         Returns:
             float: The amplitude value in decibels.
         """
-        return 10 * np.log10(amplitude + AudioMetrics.EPS)
+        return 10 * np.log10(max(amplitude, AudioMetrics.EPS))
 
     @staticmethod
     def _as_array(audio_segment):
