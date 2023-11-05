@@ -5,9 +5,9 @@ import rospy
 from pydub import AudioSegment
 from pydub.silence import split_on_silence
 
-from sample_paths import SamplePaths
-from audio_metrics import AudioMetrics
-from audio_plots import AudioPlotGenerator
+from sound_processing.sample_paths import SamplePaths
+from sound_processing.audio_metrics import AudioMetrics
+from sound_processing.audio_plots import AudioPlotGenerator
 
 from enum import Enum
 

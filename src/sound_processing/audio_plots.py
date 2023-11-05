@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.io import wavfile
 import numpy as np
 
-from sample_paths import SamplePaths
+from sound_processing.sample_paths import SamplePaths
 
 
 class AudioPlotGenerator:

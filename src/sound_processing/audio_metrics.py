@@ -2,7 +2,7 @@
 from pydub import AudioSegment
 import numpy as np
 
-from sample_paths import SamplePaths
+from sound_processing.sample_paths import SamplePaths
 
 
 class AudioMetrics:
