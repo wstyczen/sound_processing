@@ -2,9 +2,7 @@
 import rospy
 import os
 
-from audio_metrics import AudioMetrics
 from enhance_audio import AudioEnhancement
-from audio_plots import AudioPlotGenerator
 from sample_paths import SamplePaths
 
 
@@ -20,9 +18,8 @@ def process_samples():
         # Generate files with enhanced audio quality.
         AudioEnhancement(file_path, overwrite_input_file=False).enhance()
 
+
 if __name__ == "__main__":
     rospy.init_node("audio_test")
 
     process_samples()
-
-    # rospy.spin()
