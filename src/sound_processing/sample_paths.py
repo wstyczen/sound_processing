@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.6
 from enum import Enum
 
 from rospkg import RosPack

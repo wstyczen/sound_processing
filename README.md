@@ -11,5 +11,5 @@
 To run the scripts additional packages may need to be installed.
 
 ```sh
-python2 -m pip install numpy matplotlib scipy pydub
+python3 -m pip install numpy matplotlib scipy pydub
 ```
