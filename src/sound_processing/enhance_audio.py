@@ -42,7 +42,9 @@ class AudioEnhancement:
         self._background_noise = AudioSegment.from_wav(
             SamplePaths.BACKGROUND_NOISE_SAMPLE
         )
+
         self._should_overwrite_input = overwrite_input_file
+
         self._output_dir = self.get_output_dir()
 
     @staticmethod
@@ -158,12 +160,18 @@ class AudioEnhancement:
         text_file.write(str(AudioMetrics(audio_path)))
         text_file.close()
 
-    def enhance(self):
+    def enhance(self, should_generate_extra_data=False):
         """
         Enhance the audio by applying a series of processing steps.
+
+        Args:
+            should_generate_extra_data (bool): Whether the audio, its plots and
+                metrics should be generated and saved for the audio pre and post
+                enhancement.
         """
         # Save initial audio data.
-        self.save_audio_data(self.AudioState.INITIAL.value)
+        if should_generate_extra_data:
+            self.save_audio_data(self.AudioState.INITIAL.value)
 
         # Process audio.
         self.normalize_volume()
@@ -176,6 +184,7 @@ class AudioEnhancement:
         self.spectral_subtraction()
 
         # Save processed audio data.
-        self.save_audio_data(self.AudioState.ENHANCED.value)
+        if should_generate_extra_data:
+            self.save_audio_data(self.AudioState.ENHANCED.value)
         if self._should_overwrite_input:
             self.overwrite_input()
