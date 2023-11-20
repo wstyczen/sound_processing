@@ -32,7 +32,10 @@ class AudioPlotGenerator:
         self._sample_rate, self._audio_data = wavfile.read(file_path)
         # Audio in mono format is necessary for spectrogram (converted by
         # averaging the stereo audio which is typically from two channels).
-        self._mono_audio_data = np.mean(self._audio_data, axis=1)
+        if len(self._audio_data.shape) > 1:
+            self._mono_audio_data = np.mean(self._audio_data, axis=1)
+        else:
+            self._mono_audio_data = self._audio_data
 
     def _plot_waveform(self):
         """

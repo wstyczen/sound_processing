@@ -16,7 +16,9 @@ def process_samples():
         file_path = os.path.join(SamplePaths.SAMPLES_DIR, file_name)
 
         # Generate files with enhanced audio quality.
-        AudioEnhancement(file_path, overwrite_input_file=False).enhance()
+        AudioEnhancement(file_path, overwrite_input_file=False).enhance(
+            should_generate_extra_data=True, use_api=True
+        )
 
 
 if __name__ == "__main__":

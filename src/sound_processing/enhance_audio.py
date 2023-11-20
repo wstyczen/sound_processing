@@ -1,15 +1,18 @@
 #!/usr/bin/env python3.6
 import os
+from enum import Enum
+
 import rospy
 
+from audoai.noise_removal import NoiseRemovalClient
+import numpy as np
+import noisereduce
 from pydub import AudioSegment
 from pydub.silence import split_on_silence
 
 from sound_processing.sample_paths import SamplePaths
 from sound_processing.audio_metrics import AudioMetrics
 from sound_processing.audio_plots import AudioPlotGenerator
-
-from enum import Enum
 
 
 class AudioEnhancement:
@@ -22,6 +25,9 @@ class AudioEnhancement:
         _background_noise (AudioSegment): Audio of a sample of the background noise.
         _output_path (str): The path under which the processed audio will be saved.
     """
+
+    API_KEY_VARIABLE_NAME = "AUDO_AI_API_KEY"
+    API_KEY = os.environ[API_KEY_VARIABLE_NAME]
 
     class AudioState(str, Enum):
         INITIAL = "initial"
@@ -84,13 +90,13 @@ class AudioEnhancement:
 
     def normalize_volume(self, target_dbfs=0):
         """
-        Normalize the volume of the audio.
+        Normalize the average volume of the audio.
 
-        This function ensures that the audio's volume reaches the desired amplitude
-        available without clipping, making it more consistent in terms of loudness
-        and clearer overall.
+        Args:
+            target_dbfs(float): Target average amplitude in dBFS.
         """
         self.log("Normalizing volume.")
+        # max_dBFS is RMS of audio in dBFS.
         self._input = self._input.apply_gain(target_dbfs - self._input.max_dBFS)
 
     def apply_filter(self, lowcut=100, highcut=4000):
@@ -137,10 +143,59 @@ class AudioEnhancement:
         for part in non_silent_chunks[1:]:
             self._input += part
 
-    def spectral_subtraction(self, noise_profile=SamplePaths.BACKGROUND_NOISE_SAMPLE):
-        self.log("Performing spectral subtraction.")
-        # TODO: Implement working version.
-        pass
+    def _remove_noise_spectral_gating(self):
+        """
+        Remove background noise from the audio utilizing spectral gating.
+        """
+        input_array = noisereduce.reduce_noise(
+            y=np.array(self._input.get_array_of_samples()), sr=self._input.frame_rate
+        )
+
+        self._input = AudioSegment(
+            input_array.tobytes(),
+            frame_rate=self._input.frame_rate,
+            sample_width=input_array.dtype.itemsize,
+            channels=self._input.channels,
+        )
+
+    def _remove_noise_api(self):
+        """
+        Remove background noise using an online tool.
+        """
+        if self.API_KEY is None:
+            self.log(
+                f"Please set API key as '{self.API_KEY_VARIABLE_NAME}' environment variable."
+            )
+            exit(1)
+
+        # The API needs an audio in a file, so the audio is temporarily saved
+        # and loaded back afterwards.
+        TMP_AUDIO_PATH = "/tmp/tmp.wav"
+        self._input.export(TMP_AUDIO_PATH, format="wav")
+
+        api_client = NoiseRemovalClient(api_key=self.API_KEY)
+        result = api_client.process(TMP_AUDIO_PATH)
+        result.save(TMP_AUDIO_PATH)
+
+        self._input = AudioSegment.from_wav(TMP_AUDIO_PATH)
+        if os.path.exists(TMP_AUDIO_PATH):
+            os.remove(TMP_AUDIO_PATH)
+
+    def reduce_noise(self, use_api):
+        """
+        Reduce background noise in the audio.
+
+        Args:
+            use_api (bool): Whether to use an online API AI tool or locally process audio with spectral gating.
+        """
+        self.log("Reducing noise.")
+
+        # Remove audio using online AI tool.
+        if use_api:
+            self._remove_noise_api()
+        # Or using spectral gating.
+        else:
+            self._remove_noise_spectral_gating()
 
     def save_audio_data(self, state):
         """
@@ -155,12 +210,11 @@ class AudioEnhancement:
         plot_generator.plot()
         plot_generator.save(self._output_dir, state)
         # Save metrics to a file.
-        # TODO: Save as json.
-        text_file = open(os.path.join(self._output_dir, "%s_metrics.json" % state), "w")
-        text_file.write(str(AudioMetrics(audio_path)))
-        text_file.close()
+        # text_file = open(os.path.join(self._output_dir, "%s_metrics.json" % state), "w")
+        # text_file.write(str(AudioMetrics(audio_path)))
+        # text_file.close()
 
-    def enhance(self, should_generate_extra_data=False):
+    def enhance(self, should_generate_extra_data=False, use_api=False):
         """
         Enhance the audio by applying a series of processing steps.
 
@@ -168,6 +222,9 @@ class AudioEnhancement:
             should_generate_extra_data (bool): Whether the audio, its plots and
                 metrics should be generated and saved for the audio pre and post
                 enhancement.
+            use_api (bool): Whether to use a limited API call for the reducing
+                noise. If false will use Spectral Gating instead, which gives
+                much worse results.
         """
         # Save initial audio data.
         if should_generate_extra_data:
@@ -176,12 +233,14 @@ class AudioEnhancement:
         # Process audio.
         self.normalize_volume()
 
-        self.apply_filter()
-
         self.remove_silence()
 
-        # TODO: Implement working version.
-        self.spectral_subtraction()
+        self.reduce_noise(use_api)
+
+        # Remove silence again after the background noise was removed.
+        self.remove_silence()
+
+        self.apply_filter()
 
         # Save processed audio data.
         if should_generate_extra_data:
