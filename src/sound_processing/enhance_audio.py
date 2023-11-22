@@ -8,7 +8,7 @@ from audoai.noise_removal import NoiseRemovalClient
 import numpy as np
 import noisereduce
 from pydub import AudioSegment
-from pydub.silence import split_on_silence
+from pydub.silence import split_on_silence, detect_nonsilent
 
 from sound_processing.sample_paths import SamplePaths
 from sound_processing.audio_metrics import AudioMetrics
@@ -81,7 +81,7 @@ class AudioEnhancement:
             os.makedirs(save_dir)
         return save_dir
 
-    def overwrite_input(self):
+    def _overwrite_input(self):
         """
         Overwrites the input file with the audio in its current state.
         """
@@ -197,7 +197,7 @@ class AudioEnhancement:
         else:
             self._remove_noise_spectral_gating()
 
-    def save_audio_data(self, state):
+    def _save_audio_data(self, state):
         """
         Saves the audio data, plots and metrics within the data/out dir.
         """
@@ -228,7 +228,7 @@ class AudioEnhancement:
         """
         # Save initial audio data.
         if should_generate_extra_data:
-            self.save_audio_data(self.AudioState.INITIAL.value)
+            self._save_audio_data(self.AudioState.INITIAL.value)
 
         # Process audio.
         self.normalize_volume()
@@ -244,6 +244,30 @@ class AudioEnhancement:
 
         # Save processed audio data.
         if should_generate_extra_data:
-            self.save_audio_data(self.AudioState.ENHANCED.value)
+            self._save_audio_data(self.AudioState.ENHANCED.value)
         if self._should_overwrite_input:
-            self.overwrite_input()
+            self._overwrite_input()
+
+    @staticmethod
+    def get_average_volume(audio_file_path):
+        """
+        Calculate the average volume of the voiced parts of an audio recording.
+
+        Args:
+            audio_file_path (str): Path to the audio file.
+
+        Returns:
+            float: Average volume of the voiced parts.
+        """
+        audio = AudioSegment.from_file(audio_file_path)
+
+        # Use voiced segments only.
+        non_silent_parts = detect_nonsilent(audio, silence_thresh=-50)
+        voiced_segments = [audio[start:end] for start, end in non_silent_parts]
+
+        # Return calculated average volume of voiced segments.
+        if voiced_segments:
+            average_volume = sum(segment.dBFS for segment in voiced_segments) / len(voiced_segments)
+            return average_volume
+        else:
+            return None
