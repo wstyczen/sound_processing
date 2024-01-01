@@ -119,7 +119,7 @@ class AudioEnhancement:
         self._input = self._input.low_pass_filter(highcut)
         self._input = self._input.high_pass_filter(lowcut)
 
-    def remove_silence(self, silence_threshold=-50):
+    def remove_silence(self, silence_threshold=-30):
         """
         Remove large chunks of silence from the audio.
 
@@ -134,11 +134,13 @@ class AudioEnhancement:
         # Split audio segment on silent parts.
         non_silent_chunks = split_on_silence(
             audio_segment=self._input,
-            min_silence_len=200,
-            keep_silence=100,
+            keep_silence=300,
             silence_thresh=silence_threshold,
         )
         # Merge non-silent back parts together.
+        if not non_silent_chunks or len(non_silent_chunks) == 0:
+            return
+
         self._input = non_silent_chunks[0]
         for part in non_silent_chunks[1:]:
             self._input += part
