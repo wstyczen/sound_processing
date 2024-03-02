@@ -22,7 +22,6 @@ class AudioEnhancement:
     Attributes:
         _input_path (str): The path to the input audio file.
         _input (AudioSegment): The audio to be processed.
-        _background_noise (AudioSegment): Audio of a sample of the background noise.
         _output_path (str): The path under which the processed audio will be saved.
     """
 
@@ -45,9 +44,6 @@ class AudioEnhancement:
         # Load the audio from files.
         self._input_path = input_path
         self._input = AudioSegment.from_wav(input_path)
-        self._background_noise = AudioSegment.from_wav(
-            SamplePaths.BACKGROUND_NOISE_SAMPLE
-        )
 
         self._should_overwrite_input = overwrite_input_file
 
