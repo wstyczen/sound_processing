@@ -8,10 +8,9 @@ from audoai.noise_removal import NoiseRemovalClient
 import numpy as np
 import noisereduce
 from pydub import AudioSegment
-from pydub.silence import split_on_silence, detect_nonsilent
+from pydub.silence import split_on_silence
 
 from sound_processing.sample_paths import SamplePaths
-from sound_processing.audio_metrics import AudioMetrics
 from sound_processing.audio_plots import AudioPlotGenerator
 
 
@@ -245,27 +244,3 @@ class AudioEnhancement:
             self._save_audio_data(self.AudioState.ENHANCED.value)
         if self._should_overwrite_input:
             self._overwrite_input()
-
-    @staticmethod
-    def get_average_volume(audio_file_path):
-        """
-        Calculate the average volume of the voiced parts of an audio recording.
-
-        Args:
-            audio_file_path (str): Path to the audio file.
-
-        Returns:
-            float: Average volume of the voiced parts.
-        """
-        audio = AudioSegment.from_file(audio_file_path)
-
-        # Use voiced segments only.
-        non_silent_parts = detect_nonsilent(audio, silence_thresh=-50)
-        voiced_segments = [audio[start:end] for start, end in non_silent_parts]
-
-        # Return calculated average volume of voiced segments.
-        if voiced_segments:
-            average_volume = sum(segment.dBFS for segment in voiced_segments) / len(voiced_segments)
-            return average_volume
-        else:
-            return None
